@@ -23,6 +23,7 @@ public class Main {
         frame = new JFrame("Jet Hero");
         frame.setLayout(null);
         frame.setResizable(false);
+        frame.setLocation(40, 30);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         // load the game
         soloGame = new SoloGame();

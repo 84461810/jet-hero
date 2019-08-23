@@ -6,7 +6,9 @@ package org.hdme.jethero.model;
 public final class EntityPrototype {
     public static final EntityPrototype BULLET = new EntityPrototype()
             .setSize(6, 6);
-    public static final EntityPrototype JET = new EntityPrototype()
+    public static final EntityPrototype JET_SMALL = new EntityPrototype()
+            .setSize(48, 60);
+    public static final EntityPrototype JET_MEDIUM = new EntityPrototype()
             .setSize(80, 100);
 
     private int sizeX, sizeY;

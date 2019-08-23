@@ -67,11 +67,33 @@ public class EntityManager {
         }
     }
 
+    private void fixPlayerPosition() {
+        if (player == null) {
+            return;
+        }
+        // border detection
+        double x = player.getX(), y = player.getY();
+        double playerSizeX = player.getSizeX(), playerSizeY = player.getSizeY();
+        double stageSizeX = gamerule.getStageSizeX(), stageSizeY = gamerule.getStageSizeY();
+        if (x < 0) {
+            x = 0;
+        } else if (x + playerSizeX > stageSizeX) {
+            x = stageSizeX - playerSizeX;
+        }
+        if (y < 0) {
+            y = 0;
+        } else if (y + playerSizeY > stageSizeY) {
+            y = stageSizeY - playerSizeY;
+        }
+        player.setPosition(x, y);
+    }
+
     public void update() {
         // TODO: update entities
         for (Entity e : entities) {
             e.updateSpatialStatus();
         }
+        fixPlayerPosition();
         updatePlayerVelocity();
     }
 

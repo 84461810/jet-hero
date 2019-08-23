@@ -7,7 +7,7 @@ public abstract class Jet extends Entity {
 
     public Jet(double x, double y, int team) {
         super(x, y, team);
-        setEntityPrototype(EntityPrototype.JET);
+        setEntityPrototype(EntityPrototype.JET_MEDIUM);
     }
 
     public boolean isShooterOn() {

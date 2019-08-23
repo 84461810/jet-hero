@@ -72,4 +72,12 @@ public abstract class Entity {
     public double getY() {
         return posY;
     }
+
+    public int getSizeX() {
+        return entityPrototype.getSizeX();
+    }
+
+    public int getSizeY() {
+        return entityPrototype.getSizeY();
+    }
 }
