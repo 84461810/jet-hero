@@ -25,4 +25,8 @@ public abstract class Jet extends Entity {
     protected void setJetPrototype(JetPrototype prototype) {
         jetPrototype = prototype;
     }
+
+    public int getShooterAmount() {
+        return jetPrototype.getShooterAmount();
+    }
 }

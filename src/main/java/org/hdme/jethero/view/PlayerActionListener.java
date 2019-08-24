@@ -69,7 +69,12 @@ public class PlayerActionListener implements KeyListener {
             // set key status
             keyStatusList.put(key, true);
             // call handler
-            handler.onMove(getDirection());
+            if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN
+                    || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
+                handler.onMove(getDirection());
+            } else if (key == KeyEvent.VK_SPACE) {
+                handler.onShoot();
+            }
         }
     }
 
@@ -81,7 +86,10 @@ public class PlayerActionListener implements KeyListener {
         keyStatusList.put(key, false);
         if (b != null && b) {
             // call handler
-            handler.onMove(getDirection());
+            if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN
+                    || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
+                handler.onMove(getDirection());
+            }
         }
     }
 }

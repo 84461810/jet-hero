@@ -7,6 +7,8 @@ public class EnemyJet extends Jet {
     public EnemyJet(double x, double y) {
         super(x, y, Entity.TEAM_ENEMY);
         setJetPrototype(JetPrototype.ENEMY_JET);
+        setBoundingBoxAsPrototype(BoundingBoxGroup.ENEMY_JET);
+        setTypeName("EnemyJet");
     }
 
     public int getMoveTimer() {

@@ -23,4 +23,10 @@ public class PlayerActionHandler {
             entityManager.setPlayerMovingDirection(direction);
         }
     }
+
+    public void onShoot() {
+        if (entityManager != null) {
+            entityManager.setPlayerShooterOn(true);
+        }
+    }
 }

@@ -1,12 +1,10 @@
 package org.hdme.jethero;
 
 import org.hdme.jethero.game.SoloGame;
-import org.hdme.jethero.view.PlayerActionListener;
+import org.hdme.jethero.model.Entity;
 import org.hdme.jethero.view.SoloGamePanel;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.io.FileInputStream;
 
 public class Main {
     private static JFrame frame;
@@ -39,7 +37,7 @@ public class Main {
             soloGame.update();
             frame.repaint();
             try {
-                Thread.sleep(5);
+                Thread.sleep(Entity.TICK_DURATION);
             } catch (Exception e) {
                 e.printStackTrace();
             }

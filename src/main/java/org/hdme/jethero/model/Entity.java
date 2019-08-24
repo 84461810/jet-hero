@@ -2,6 +2,8 @@ package org.hdme.jethero.model;
 
 /**
  * Entity data structure. The super class of all entity-type classes.
+ * <br/>A non-abstract inheriting class should call <code>setEntityPrototype</code>
+ * and <code>setBoundingBoxAsPrototype</code> in its constructor.
  */
 public abstract class Entity {
     /**
@@ -16,7 +18,9 @@ public abstract class Entity {
     public static final int TEAM_NEUTRAL = 2;
 
     private EntityPrototype entityPrototype;
+    private BoundingBoxGroup boundingBox;
     private int team;
+    private String typeName;
     // position of top-left corner
     private double posX, posY;
     private double veloX, veloY;
@@ -40,6 +44,14 @@ public abstract class Entity {
         entityPrototype = prototype;
     }
 
+    protected void setBoundingBoxAsPrototype(BoundingBoxGroup prototype) {
+        boundingBox = (BoundingBoxGroup) prototype.clone();
+    }
+
+    protected void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
     /**
      * Update position, and then velocity
      */
@@ -48,6 +60,9 @@ public abstract class Entity {
         posY += veloY;
         veloX += aclrX;
         veloY += aclrY;
+        if (boundingBox != null) {
+            boundingBox.setOffset(posX, posY);
+        }
     }
 
     public void setPosition(double x, double y) {
@@ -58,6 +73,11 @@ public abstract class Entity {
     public void setVelocity(double x, double y) {
         veloX = x;
         veloY = y;
+    }
+
+    public void setVelocityRadius(double r, double a) {
+        veloX = r * Math.cos(a);
+        veloY = r * Math.sin(a);
     }
 
     public void setAcceleration(double x, double y) {
@@ -79,5 +99,24 @@ public abstract class Entity {
 
     public int getSizeY() {
         return entityPrototype.getSizeY();
+    }
+
+    public int getTeam() {
+        return team;
+    }
+
+    public boolean intersects(Entity e) {
+        if (e == null) {
+            return false;
+        }
+        if (boundingBox == null || e.boundingBox == null) {
+            return false;
+        }
+        return boundingBox.intersects(e.boundingBox);
+    }
+
+    @Override
+    public String toString() {
+        return typeName + "@(" + posX + ", " + posY + ")";
     }
 }

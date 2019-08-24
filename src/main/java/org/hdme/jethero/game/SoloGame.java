@@ -5,7 +5,6 @@ import org.hdme.jethero.model.Entity;
 import org.hdme.jethero.view.PlayerActionListener;
 import org.hdme.jethero.view.SoloGamePanel;
 
-import javax.swing.*;
 import java.util.LinkedList;
 import java.util.List;
 
