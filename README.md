@@ -5,7 +5,13 @@
 ## Introduction
 Drive jets, win battles, and be a hero!
 
-## Installation
+## Runtime Environment
+Java Runtime Environment 8 or higher versions.
+
+## Installation & Execution
+Just download a released version and execute the .jar file.  
+Now enjoy! :)
 
 ## Gameplay
-
+Move: arrow keys  
+Shoot: space
