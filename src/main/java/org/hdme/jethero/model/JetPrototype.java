@@ -15,7 +15,7 @@ public final class JetPrototype {
     public static final JetPrototype ENEMY_JET = new JetPrototype()
             .setMaxVelocity(0.5)
             .addShooter((EntityPrototype.JET_MEDIUM.getSizeX() - EntityPrototype.BULLET.getSizeX()) / 2,
-                    -EntityPrototype.JET_MEDIUM.getSizeY(),
+                    EntityPrototype.JET_MEDIUM.getSizeY(),
                     Math.PI / 2, 2);
 
     // pixels per tick

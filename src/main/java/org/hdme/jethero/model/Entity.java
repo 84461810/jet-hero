@@ -93,6 +93,22 @@ public abstract class Entity {
         return posY;
     }
 
+    public double getVelocityX() {
+        return veloX;
+    }
+
+    public double getVelocityY() {
+        return veloY;
+    }
+
+    public void setVelocityX(double velocityX) {
+        this.veloX = velocityX;
+    }
+
+    public void setVelocityY(double velocityY) {
+        this.veloY = velocityY;
+    }
+
     public int getSizeX() {
         return entityPrototype.getSizeX();
     }

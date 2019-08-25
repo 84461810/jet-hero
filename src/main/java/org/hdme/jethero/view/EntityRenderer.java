@@ -22,7 +22,7 @@ public class EntityRenderer extends Renderer {
     }
 
     @Override
-    protected void render(Graphics g) {
+    public void render(Graphics g) {
         if (mediator == null) {
             return;
         }

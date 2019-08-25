@@ -12,19 +12,22 @@ import java.util.Random;
  */
 public class EntityManager {
     private GameRule gamerule;
+    private ScoreBoard scoreBoard;
     private List<Entity> entities;
-    private Entity player;
+    private PlayerJet player;
     private MovingDirection playerDirection = MovingDirection.NONE;
 
     private int enemyGeneratorTimer;
+    private boolean playerCrashed = false;
 
-    public EntityManager(List<Entity> entities, GameRule rule) {
+    public EntityManager(List<Entity> entities, GameRule rule, ScoreBoard board) {
         this.entities = entities;
         gamerule = rule;
+        scoreBoard = board;
         if (rule != null) {
             // setup player jet
             player = new PlayerJet(rule.getPlayerSpawnPosX(), rule.getPlayerSpawnPosY());
-            ((PlayerJet) player).setAmmo(gamerule.getPlayerMaxAmmo());
+            player.setAmmo(gamerule.getPlayerMaxAmmo());
             addEntity(player);
             // setup enemy generator timer
             enemyGeneratorTimer = gamerule.getTimeFirstTryGeneratingEnemies();
@@ -38,6 +41,37 @@ public class EntityManager {
         }
         if (!entities.add(e)) {
             System.out.println("Fail to add entity " + e);
+        }
+    }
+    
+    private void addEntities(List<Entity> list) {
+        for (Entity e : list) {
+            addEntity(e);
+        }
+    }
+    
+    private void removeEntity(Entity e) {
+        if (e == null) {
+            return;
+        }
+        if (!entities.remove(e)) {
+            System.out.println("Fail to remove entity " + e);
+        }
+        if (e instanceof Bullet) {
+            Bullet b = (Bullet) e;
+            if (b.getOwner() == player && player != null) {
+                // recycle player's bullet
+                player.increaseAmmo(1);
+            }
+        } else if (e == player) {
+            // player crashes => game over
+            playerCrashed = true;
+        }
+    }
+
+    private void removeEntities(List<Entity> list) {
+        for (Entity e : list) {
+            removeEntity(e);
         }
     }
 
@@ -100,7 +134,6 @@ public class EntityManager {
     }
 
     private void checkCollisions() {
-        // TODO: non-rectangle/multi-rectangle collision box
         List<Entity> list = new LinkedList<>();
         for (Entity e1 : entities) {
             if (e1 == null) {
@@ -113,16 +146,19 @@ public class EntityManager {
                 if (e1.getTeam() != e2.getTeam()) {
                     if (e1.intersects(e2)) {
                         list.add(e1);
+                        if (e1 instanceof EnemyJet) {
+                            scoreBoard.addEnemyAmountKilled(1);
+                        }
                         break;
                     }
                 }
             }
         }
-        entities.removeAll(list);
+        removeEntities(list);
     }
 
     private void generateBullets() {
-        List<Bullet> list = new LinkedList<>();
+        List<Entity> list = new LinkedList<>();
         for (Entity e : entities) {
             if (e == null) {
                 continue;
@@ -131,6 +167,7 @@ public class EntityManager {
                 Jet j = (Jet) e;
                 if (j.isShooterOn()) {
                     Shooter[] shooters = j.getJetPrototype().getShooters();
+                    // check player's ammo
                     if (j instanceof PlayerJet) {
                         PlayerJet p = (PlayerJet) j;
                         if (!p.consumeAmmo()) {
@@ -149,26 +186,28 @@ public class EntityManager {
                 }
             }
         }
-        entities.addAll(list);
+        addEntities(list);
     }
 
     private void removeOutRangeEntities() {
         List<Entity> list = new LinkedList<>();
         for (Entity e : entities) {
+            if (e == null) {
+                continue;
+            }
             double x1 = e.getX(), y1 = e.getY();
             double x2 = x1 + e.getSizeX(), y2 = y1 + e.getSizeY();
             if (e instanceof Bullet) {
-                if (x1 < 0 || x2 > gamerule.getStageSizeX() || y1 < 0 || y2 > gamerule.getStageSizeY()) {
+                if (x2 < 0 || x1 > gamerule.getStageSizeX() || y2 < 0 || y1 > gamerule.getStageSizeY()) {
                     list.add(e);
-                    if (((Bullet) e).getOwner() == player && player instanceof PlayerJet) {
-                        PlayerJet p = (PlayerJet) player;
-                        p.increaseAmmo(1);
-                    }
+                }
+            } else {
+                if (y1 > gamerule.getStageSizeY()) {
+                    list.add(e);
                 }
             }
         }
-        entities.removeAll(list);
-        // TODO: remove jets
+        removeEntities(list);
     }
 
     private int getEnemyJetCount() {
@@ -192,13 +231,60 @@ public class EntityManager {
             int exist = getEnemyJetCount(), maxEnemyCount = gamerule.getMaxEnemyCount();
             for (int i = 0; i < amount && exist + i < maxEnemyCount; i++) {
                 // x is random, while y is fixed (the top border)
-                //double x = random.nextDouble() * (gamerule.getStageSizeX() - EntityPrototype.JET_MEDIUM.getSizeX());
-                double x = random.nextInt(8) * 100;
-                //double y = -EntityPrototype.JET_MEDIUM.getSizeY();
-                double y = 0;
-                entities.add(new EnemyJet(x, y));
+                double x = random.nextDouble() * (gamerule.getStageSizeX() - EntityPrototype.JET_MEDIUM.getSizeX());
+                double y = -EntityPrototype.JET_MEDIUM.getSizeY();
+                EnemyJet enemy = new EnemyJet(x, y);
+                enemy.setCharging(true);
+                enemy.setVelocityX(Math.sqrt(gamerule.getEnemyVibrationCoefficient()) * gamerule.getEnemyVibrationRadius());
+                addEntity(enemy);
             }
             enemyGeneratorTimer = gamerule.getIntervalGeneratingEnemies();
+        }
+    }
+
+    private void enemiesActs() {
+        Random random = new Random();
+        random.setSeed(System.currentTimeMillis());
+        for (Entity e : entities) {
+            if (e == null) {
+                continue;
+            }
+            if (e instanceof EnemyJet) {
+                EnemyJet enemy = (EnemyJet) e;
+                if (!enemy.decreaseChargeTimer()) {
+                    // change charge status
+                    enemy.setCharging(random.nextBoolean());
+                    // reset charge timer
+                    enemy.setChargeTimer(gamerule.getIntervalEnemyTryCharging());
+                    enemy.decreaseChargeTimer();
+                }
+                // vibration
+                enemy.setAcceleration((enemy.getCenterX() - enemy.getX()) * gamerule.getEnemyVibrationCoefficient(), 0);
+                // charge
+                if (enemy.isCharging()) {
+                    double v = enemy.getJetPrototype().getMaxVelocity();
+                    double vx = enemy.getVelocityX();
+                    if (Math.abs(v) <= Math.abs(vx)) {
+                        enemy.setVelocityY(0);
+                    } else {
+                        enemy.setVelocityY(v * v - vx * vx);
+                    }
+                } else {
+                    enemy.setVelocityY(0);
+                }
+                if (!enemy.decreaseShootTimer()) {
+                    // enemy tries shooting
+                    if (random.nextBoolean()) {
+                        // shoot
+                        enemy.setShooterOn(true);
+                        enemy.setShootTimer(gamerule.getIntervalEnemyTryShootingOnSuccess());
+                    } else {
+                        // try next time
+                        enemy.setShootTimer(gamerule.getIntervalEnemyTryShootingOnFail());
+                    }
+                    enemy.decreaseShootTimer();
+                }
+            }
         }
     }
 
@@ -210,7 +296,6 @@ public class EntityManager {
      * <code>org.hdme.jethero.model.Entity.TICK_DURATION</code>.
      */
     public void update() {
-        // TODO: update entities
         for (Entity e : entities) {
             e.updateSpatialStatus();
         }
@@ -220,7 +305,7 @@ public class EntityManager {
         checkCollisions();
         generateBullets();
         tryGeneratingEnemies();
-        //doEnemiesAction();
+        enemiesActs();
     }
 
     public void setPlayerMovingDirection(MovingDirection direction) {
@@ -231,15 +316,16 @@ public class EntityManager {
         if (player == null) {
             return;
         }
-        if (b && player instanceof PlayerJet) {
-            PlayerJet p = (PlayerJet) player;
-            if (!p.isAbleToConsumeAmmo()) {
+        if (b) {
+            if (!player.isAbleToConsumeAmmo()) {
                 // no enough ammo
                 return;
             }
         }
-        if (player instanceof Jet) {
-            ((Jet) player).setShooterOn(b);
-        }
+        player.setShooterOn(b);
+    }
+
+    public boolean isPlayerCrashed() {
+        return playerCrashed;
     }
 }

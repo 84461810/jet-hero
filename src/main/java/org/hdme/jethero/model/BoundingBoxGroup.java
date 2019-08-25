@@ -6,8 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class BoundingBoxGroup implements Cloneable {
-    public static final BoundingBoxGroup PLAYER_JET = new BoundingBoxGroup();
-    //todo: add player bounding box
+    public static final BoundingBoxGroup PLAYER_JET = new BoundingBoxGroup()
+            .addBoundingBox(new Polygon().addPoint(19, 100).addPoint(61, 100).addPoint(61, 50).addPoint(19, 50))
+            .addBoundingBox(new Polygon().addPoint(19, 85).addPoint(0, 81).addPoint(0, 69).addPoint(19, 50))
+            .addBoundingBox(new Polygon().addPoint(61, 85).addPoint(80, 81).addPoint(80, 69).addPoint(61, 50))
+            .addBoundingBox(new Polygon().addPoint(19, 50).addPoint(39, 0).addPoint(41, 0).addPoint(61, 50));
     public static final BoundingBoxGroup ENEMY_JET = new BoundingBoxGroup()
             .addBoundingBox(new Polygon().addPoint(19, 0).addPoint(61, 0).addPoint(61, 50).addPoint(19, 50))
             .addBoundingBox(new Polygon().addPoint(19, 15).addPoint(0, 19).addPoint(0, 31).addPoint(19, 50))
