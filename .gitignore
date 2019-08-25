@@ -3,3 +3,6 @@
 
 # output files
 target/
+
+# releases
+release/
